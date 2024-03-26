@@ -1,1 +1,9 @@
 <h1>Preventing memeory leaks</h1>
+
+<div class="parentContainer">
+  <button (click)="componentToggle = !componentToggle">Toggle componnet</button>
+
+<ng-container *ngIf="componentToggle">
+  <div><app-component></app-component></div>
+</ng-container>
+</div>
