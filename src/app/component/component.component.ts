@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { from, map, Observable, of } from 'rxjs';
+import { from, map, Observable, of, subscribeOn, Subscription, take } from 'rxjs';
 
 @Component({
   selector: 'app-component',
@@ -10,18 +10,21 @@ import { from, map, Observable, of } from 'rxjs';
 })
 export class ComponentComponent implements OnInit, OnDestroy {
 
+  $subscription!: Subscription;
   // dummy observable that will always leak
-  $dummy_observable: Observable<any> = new Observable(observer => {
+  dummy_observable: Observable<any> = new Observable(observer => {
     const timeoutid = setInterval(() => {
       observer.next('👉 will display each second!')
     }, 1000);
+
+    return () => clearInterval(timeoutid);
   });
 
   ngOnInit(): void {
     console.log("🟢 Componnet has been mounted");
 
     // making sure to log the observable for visual confirmation
-    this.$dummy_observable
+    this.$subscription = this.dummy_observable
       .subscribe({
         next: (value: any) => {
           console.log(value);
@@ -33,5 +36,10 @@ export class ComponentComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     console.log('🔴 Component has been destroyed');
+
+    Object.entries(this).forEach(([k, v]) => {
+      if (k.indexOf('$') === 0 && v instanceof (Subscription))
+        v.unsubscribe();
+    })
   }
 }
